@@ -1,4 +1,13 @@
 @import "tailwindcss";
+@import "@fontsource/poppins/400.css";
+@import "@fontsource/poppins/500.css";
+@import "@fontsource/poppins/600.css";
+@import "@fontsource/poppins/700.css";
+
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
 
 :root {
   --background: #F9FAFB;
@@ -12,9 +21,9 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-accent: var(--accent);
-
-  --font-heading: var(--font-poppins), sans-serif;
-  --font-body: var(--font-inter), sans-serif;
+  
+  --font-heading: "Poppins", sans-serif;
+  --font-body: "Inter", sans-serif;
 }
 
 * {
