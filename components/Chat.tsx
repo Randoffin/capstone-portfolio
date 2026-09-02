@@ -1,8 +1,130 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { DefaultChatTransport } from "ai";
+import {
+    DefaultChatTransport,
+    type ToolUIPart,
+} from "ai";
 import { useChat } from "@ai-sdk/react";
+
+import MetaTagsCard from "./MetaTagsCard";
+
+
+// ============================================================
+// PHASE 5C Typed tool part
+// ============================================================
+
+type FetchMetaTagsUIPart = ToolUIPart<{
+    fetchMetaTags: {
+        input: {
+            url: string;
+        };
+        output: {
+            url: string;
+            title: string | null;
+            description: string | null;
+            canonical: string | null;
+            ogTitle: string | null;
+            ogDescription: string | null;
+            ogImage: string | null;
+            twitterCard: string | null;
+        };
+    };
+}>;
+
+
+// ============================================================
+// PHASE 5D Tool lifecycle renderer
+// ============================================================
+
+function FetchMetaTagsPart({
+    part,
+}: {
+    part: FetchMetaTagsUIPart;
+}) {
+    switch (part.state) {
+        case "input-streaming":
+            return (
+                <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+                    <div className="flex items-center gap-2">
+                        <span
+                            className="h-2 w-2 animate-pulse rounded-full bg-blue-500"
+                            aria-hidden="true"
+                        />
+
+                        <span className="text-sm font-medium text-blue-800">
+                            Preparing webpage analysis...
+                        </span>
+                    </div>
+
+                    {part.input?.url && (
+                        <p className="mt-2 break-all text-xs text-blue-700">
+                            {part.input.url}
+                        </p>
+                    )}
+                </div>
+            );
+
+        case "input-available":
+            return (
+                <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                    <p className="text-sm font-semibold text-amber-800">
+                        Tool ready
+                    </p>
+
+                    <p className="mt-1 break-all text-xs text-amber-700">
+                        Analyzing: {part.input.url}
+                    </p>
+                </div>
+            );
+
+        case "output-available":
+            return <MetaTagsCard result={part.output} />;
+
+        case "output-error":
+            return (
+                <div
+                    role="alert"
+                    className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-4"
+                >
+                    <div className="flex items-start gap-3">
+                        <span
+                            className="text-lg"
+                            aria-hidden="true"
+                        >
+                        
+                        </span>
+
+                        <div>
+                            <h3 className="font-semibold text-red-800">
+                                Tool execution failed
+                            </h3>
+
+                            <p className="mt-1 text-sm leading-6 text-red-700">
+                                We couldn't fetch metadata from this
+                                webpage. Please check the URL and try
+                                again.
+                            </p>
+
+                            {part.errorText && (
+                                <p className="mt-2 text-xs text-red-600">
+                                    {part.errorText}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+
+        default:
+            return null;
+    }
+}
+
+
+// ============================================================
+// EXISTING CHAT COMPONENT
+// ============================================================
 
 export default function Chat() {
     const [input, setInput] = useState("");
@@ -21,7 +143,9 @@ export default function Chat() {
     const messagesRef = useRef<HTMLDivElement | null>(null);
     const shouldAutoScrollRef = useRef(true);
 
-    const isBusy = status === "submitted" || status === "streaming";
+    const isBusy =
+        status === "submitted" ||
+        status === "streaming";
 
     const scrollToBottom = () => {
         const container = messagesRef.current;
@@ -48,7 +172,8 @@ export default function Chat() {
             container.scrollTop -
             container.clientHeight;
 
-        shouldAutoScrollRef.current = distanceFromBottom < 80;
+        shouldAutoScrollRef.current =
+            distanceFromBottom < 80;
     };
 
     useEffect(() => {
@@ -57,7 +182,9 @@ export default function Chat() {
         }
     }, [messages]);
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (
+        event: React.FormEvent<HTMLFormElement>,
+    ) => {
         event.preventDefault();
 
         const trimmedInput = input.trim();
@@ -100,9 +227,9 @@ export default function Chat() {
                             </h2>
 
                             <p className="mt-2 text-sm leading-6 text-gray-600">
-                                Try asking: “What technologies are used in
-                                this portfolio?” or “Tell me about the
-                                projects.”
+                                Try asking: "What technologies are used in
+                                this portfolio?" or "Tell me about the
+                                projects."
                             </p>
                         </div>
                     </div>
@@ -115,7 +242,9 @@ export default function Chat() {
                         <div
                             key={message.id}
                             className={`flex ${
-                                isUser ? "justify-end" : "justify-start"
+                                isUser
+                                    ? "justify-end"
+                                    : "justify-start"
                             }`}
                         >
                             <div
@@ -126,28 +255,57 @@ export default function Chat() {
                                 }`}
                             >
                                 <div className="mb-1 text-xs font-semibold uppercase tracking-wide opacity-70">
-                                    {isUser ? "You" : "AI Assistant"}
+                                    {isUser
+                                        ? "You"
+                                        : "AI Assistant"}
                                 </div>
 
                                 <div className="space-y-2">
-                                    {message.parts.map((part, index) => {
-                                        if (part.type !== "text") {
+
+                                    {/* ==================================================
+                                        PHASE 5E Render typed message parts
+                                    ================================================== */}
+
+                                    {message.parts.map(
+                                        (part, index) => {
+                                            if (
+                                                part.type ===
+                                                "text"
+                                            ) {
+                                                return (
+                                                    <p
+                                                        key={`${message.id}-${index}`}
+                                                        className="whitespace-pre-wrap"
+                                                    >
+                                                        {part.text}
+                                                    </p>
+                                                );
+                                            }
+
+                                            if (
+                                                part.type ===
+                                                "tool-fetchMetaTags"
+                                            ) {
+                                                return (
+                                                    <FetchMetaTagsPart
+                                                        key={`${message.id}-${index}`}
+                                                        part={
+                                                            part as FetchMetaTagsUIPart
+                                                        }
+                                                    />
+                                                );
+                                            }
+
                                             return null;
-                                        }
+                                        },
+                                    )}
 
-                                        return (
-                                            <p
-                                                key={`${message.id}-${index}`}
-                                                className="whitespace-pre-wrap"
-                                            >
-                                                {part.text}
-                                            </p>
-                                        );
-                                    })}
-
-                                    {message.role === "assistant" &&
-                                        message.parts.length === 0 &&
-                                        status === "submitted" && (
+                                    {message.role ===
+                                        "assistant" &&
+                                        message.parts.length ===
+                                            0 &&
+                                        status ===
+                                            "submitted" && (
                                             <div
                                                 className="flex items-center gap-2"
                                                 aria-live="polite"
@@ -156,7 +314,10 @@ export default function Chat() {
                                                     className="h-2 w-2 animate-pulse rounded-full bg-gray-500"
                                                     aria-hidden="true"
                                                 />
-                                                <span>Thinking...</span>
+
+                                                <span>
+                                                    Thinking...
+                                                </span>
                                             </div>
                                         )}
                                 </div>
@@ -185,7 +346,9 @@ export default function Chat() {
                 <div className="flex items-end gap-2">
                     <textarea
                         value={input}
-                        onChange={(event) => setInput(event.target.value)}
+                        onChange={(event) =>
+                            setInput(event.target.value)
+                        }
                         onKeyDown={(event) => {
                             if (
                                 event.key === "Enter" &&
@@ -193,7 +356,10 @@ export default function Chat() {
                             ) {
                                 event.preventDefault();
 
-                                if (input.trim() && !isBusy) {
+                                if (
+                                    input.trim() &&
+                                    !isBusy
+                                ) {
                                     event.currentTarget.form?.requestSubmit();
                                 }
                             }
@@ -221,3 +387,5 @@ export default function Chat() {
         </section>
     );
 }
+
+                  

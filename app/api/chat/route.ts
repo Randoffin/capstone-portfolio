@@ -5,6 +5,7 @@ import {
 } from "ai";
 
 import { chatModel, chatSystemPrompt } from "../../../lib/ai/config";
+import { fetchMetaTags } from "../../../lib/tools/fetch-meta-tags";
 
 export async function POST(req: Request) {
     try {
@@ -14,6 +15,10 @@ export async function POST(req: Request) {
             model: chatModel,
             system: chatSystemPrompt,
             messages: await convertToModelMessages(messages),
+
+            tools: {
+                fetchMetaTags,
+            },
 
             // Allows the client Stop button to abort the server-side
             // model request through the request signal.
@@ -37,3 +42,5 @@ export async function POST(req: Request) {
         );
     }
 }
+
+
