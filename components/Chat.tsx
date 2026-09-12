@@ -9,7 +9,6 @@ import { useChat } from "@ai-sdk/react";
 
 import MetaTagsCard from "./MetaTagsCard";
 
-
 // ============================================================
 // PHASE 5C Typed tool part
 // ============================================================
@@ -31,7 +30,6 @@ type FetchMetaTagsUIPart = ToolUIPart<{
         };
     };
 }>;
-
 
 // ============================================================
 // PHASE 5D Tool lifecycle renderer
@@ -121,7 +119,6 @@ function FetchMetaTagsPart({
     }
 }
 
-
 // ============================================================
 // EXISTING CHAT COMPONENT
 // ============================================================
@@ -134,6 +131,8 @@ export default function Chat() {
         sendMessage,
         status,
         stop,
+        error,
+        regenerate,
     } = useChat({
         transport: new DefaultChatTransport({
             api: "/api/chat",
@@ -201,6 +200,18 @@ export default function Chat() {
         shouldAutoScrollRef.current = true;
     };
 
+    const handleSuggestedPrompt = (prompt: string) => {
+        if (isBusy) {
+            return;
+        }
+
+        sendMessage({
+            text: prompt,
+        });
+
+        shouldAutoScrollRef.current = true;
+    };
+
     return (
         <section className="mx-auto flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
             <header className="border-b border-gray-200 px-4 py-4 sm:px-6">
@@ -221,16 +232,58 @@ export default function Chat() {
             >
                 {messages.length === 0 && (
                     <div className="flex min-h-[320px] items-center justify-center text-center">
-                        <div className="max-w-md">
+                        <div className="w-full max-w-md">
                             <h2 className="text-lg font-semibold text-gray-900">
                                 Start a conversation
                             </h2>
 
                             <p className="mt-2 text-sm leading-6 text-gray-600">
-                                Try asking: "What technologies are used in
-                                this portfolio?" or "Tell me about the
-                                projects."
+                                Choose a question below or type your own
+                                message to explore this portfolio.
                             </p>
+
+                            <div className="mt-5 flex flex-col gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        handleSuggestedPrompt(
+                                            "What technologies are used in this portfolio?",
+                                        )
+                                    }
+                                    disabled={isBusy}
+                                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm text-gray-700 transition hover:border-primary hover:bg-blue-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    What technologies are used in this
+                                    portfolio?
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        handleSuggestedPrompt(
+                                            "Tell me about the projects in this portfolio.",
+                                        )
+                                    }
+                                    disabled={isBusy}
+                                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm text-gray-700 transition hover:border-primary hover:bg-blue-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Tell me about the projects in this
+                                    portfolio.
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        handleSuggestedPrompt(
+                                            "How was this portfolio developed?",
+                                        )
+                                    }
+                                    disabled={isBusy}
+                                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm text-gray-700 transition hover:border-primary hover:bg-blue-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    How was this portfolio developed?
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -261,7 +314,6 @@ export default function Chat() {
                                 </div>
 
                                 <div className="space-y-2">
-
                                     {/* ==================================================
                                         PHASE 5E Render typed message parts
                                     ================================================== */}
@@ -336,6 +388,33 @@ export default function Chat() {
                     >
                         Stop
                     </button>
+                </div>
+            )}
+
+            {error && (
+                <div
+                    role="alert"
+                    className="border-t border-red-200 bg-red-50 px-4 py-4 sm:px-6"
+                >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 className="text-sm font-semibold text-red-800">
+                                Something went wrong
+                            </h2>
+
+                            <p className="mt-1 text-sm leading-6 text-red-700">
+                                We couldn't complete that response. Please try again.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => regenerate()}
+                            className="shrink-0 rounded-lg border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        >
+                            Try again
+                        </button>
+                    </div>
                 </div>
             )}
 
