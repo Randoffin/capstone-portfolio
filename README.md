@@ -45,6 +45,11 @@ software.
 - API health-check endpoint
 - Responsive interface for desktop and mobile devices
 - Production deployment through Vercel
+- Interactive 3D desk lamp configurator at `/fe-aa2`
+- Real-time lamp colour and illumination controls
+- Mouse and touch camera interaction with zoom and reset
+- Lazy-loaded 3D experience using React Three Fiber
+- WebGL fallback and bounded rendering resolution for performance
 
 ## Technology Stack
 
@@ -54,6 +59,9 @@ software.
 - React 19
 - TypeScript
 - Tailwind CSS
+- Three.js
+- React Three Fiber
+- React Three Drei
 
 ### AI
 
@@ -71,6 +79,35 @@ the application's overall tool architecture.
 - Git
 - GitHub
 - Vercel
+
+## FE-AA2: Interactive 3D Experience
+
+The `/fe-aa2` route contains an interactive 3D desk lamp
+configurator built with Three.js, React Three Fiber, and Drei.
+
+### Interactions
+
+- Change the lamp finish using the colour selector.
+- Switch the lamp illumination on and off.
+- Rotate the scene and zoom using supported pointer or touch gestures.
+- Reset the camera by remounting the scene.
+
+### Performance considerations
+
+- The 3D component is dynamically imported with server-side rendering disabled.
+- Rendering resolution is limited to a device pixel ratio of 1–1.5.
+- Shadow-map resolution is limited to 512 × 512.
+- The scene uses geometric primitives rather than downloaded 3D models.
+
+### Accessibility and compatibility
+
+- Controls are implemented as semantic buttons.
+- The lamp power control exposes its state through `aria-checked`.
+- The scene does not run a continuous decorative animation.
+- A fallback message is provided for environments where the 3D canvas cannot render.
+
+Performance measurements and browser compatibility should be
+verified before release.
 
 ## Project Structure
 
