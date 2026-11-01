@@ -255,7 +255,7 @@ export default function InteractiveLamp({
   const canvasFallback: ReactNode = <WebGLFallback />;
 
   return (
-    <div className="h-full min-h-[320px] w-full overflow-hidden rounded-2xl bg-gradient-to-b from-slate-50 to-slate-200">
+    <div className="h-[380px] w-full overflow-hidden rounded-2xl bg-gradient-to-b from-slate-50 to-slate-200 sm:h-[480px]">
       <Canvas
         shadows
         dpr={[1, 1.25]}
